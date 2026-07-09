@@ -1,83 +1,68 @@
 #!/usr/bin/env python3
 """
-과천중앙고등학교 시간표 - 최종 자동 생성기
-assets/ 폴더에 이미지만 넣으면 전체 사이트 자동 생성
+과천중앙고등학교 시간표 - 최종 버전
+- assets/teachers/ : 교사 49명
+- assets/classes/ : 1학년_월~금, 2학년_월~금, 3학년_월~금 (15개)
 """
 
-import os
 import json
 from pathlib import Path
-from datetime import datetime
 
 BASE = Path("/home/workdir")
-
 ASSETS = BASE / "assets"
-MASTER_DIR = ASSETS / "master"
 TEACHERS_DIR = ASSETS / "teachers"
 CLASSES_DIR = ASSETS / "classes"
+MASTER_DIR = ASSETS / "master"
 
 DATA_DIR = BASE / "data"
 TEACHERS_HTML = BASE / "teachers"
 CLASSES_HTML = BASE / "classes"
 
 def ensure_folders():
-    for d in [MASTER_DIR, TEACHERS_DIR, CLASSES_DIR, DATA_DIR, TEACHERS_HTML, CLASSES_HTML]:
+    for d in [TEACHERS_DIR, CLASSES_DIR, MASTER_DIR, DATA_DIR, TEACHERS_HTML, CLASSES_HTML]:
         d.mkdir(parents=True, exist_ok=True)
-
-def get_images(folder):
-    return sorted(list(folder.glob("*.png")) + list(folder.glob("*.jpg")))
 
 def get_teachers():
     teachers = []
-    for img in get_images(TEACHERS_DIR):
+    for img in sorted(TEACHERS_DIR.glob("*.png")) + sorted(TEACHERS_DIR.glob("*.jpg")):
         name = img.stem.replace("과천중앙고등학교_", "")
         teachers.append({
             "id": name,
             "name": name,
             "image": f"assets/teachers/{img.name}",
-            "html": f"teachers/{name}.html",
-            "type": "teacher"
+            "html": f"teachers/{name}.html"
         })
     return teachers
 
 def get_classes():
     classes = []
-    for img in get_images(CLASSES_DIR):
+    for img in sorted(CLASSES_DIR.glob("*.png")) + sorted(CLASSES_DIR.glob("*.jpg")):
         name = img.stem.replace("과천중앙고등학교_", "")
         classes.append({
             "id": name,
             "name": name,
             "image": f"assets/classes/{img.name}",
-            "html": f"classes/{name}.html",
-            "type": "class"
+            "html": f"classes/{name}.html"
         })
     return classes
 
 def get_master():
-    images = get_images(MASTER_DIR)
-    if images:
-        return {"image": f"assets/master/{images[0].name}", "name": "전체 시간표"}
+    imgs = sorted(MASTER_DIR.glob("*.png")) + sorted(MASTER_DIR.glob("*.jpg"))
+    if imgs:
+        return {"image": f"assets/master/{imgs[0].name}"}
     return None
 
-def generate_all():
+def generate():
     ensure_folders()
     teachers = get_teachers()
     classes = get_classes()
     master = get_master()
-    
-    DATA_DIR.mkdir(exist_ok=True)
+
     with open(DATA_DIR / "teachers.json", "w", encoding="utf-8") as f:
         json.dump(teachers, f, ensure_ascii=False, indent=2)
     with open(DATA_DIR / "classes.json", "w", encoding="utf-8") as f:
         json.dump(classes, f, ensure_ascii=False, indent=2)
-    
-    generate_index(teachers, classes, master)
-    generate_teacher_pages(teachers)
-    generate_class_pages(classes)
-    
-    print(f"✅ 생성 완료: 교사 {len(teachers)}개, 반 {len(classes)}개")
 
-def generate_index(teachers, classes, master):
     html = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -87,109 +72,99 @@ def generate_index(teachers, classes, master):
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header>
-        <h1>🏫 과천중앙고등학교 시간표</h1>
-        <p>2026학년도 • 실시간 조회</p>
-    </header>
-    
-    <div class="container">
+<header>
+    <h1>🏫 과천중앙고등학교 시간표</h1>
+    <p>2026학년도</p>
+</header>
+<div class="container">
 """
-    
+
     if master:
         html += f"""
-        <div class="section">
-            <h2>📋 전체 시간표</h2>
-            <div style="text-align:center; background:white; padding:20px; border-radius:16px;">
-                <img src="{master['image']}" alt="전체 시간표" style="max-width:100%; border-radius:12px;">
-            </div>
-        </div>
+    <div class="section">
+        <h2>📋 전체 시간표</h2>
+        <img src="{master['image']}" style="max-width:100%; border-radius:12px;">
+    </div>
 """
     else:
         html += """
-        <div class="section">
-            <h2>📋 전체 시간표</h2>
-            <p style="color:#64748b;">assets/master/ 폴더에 전체 시간표 이미지를 넣으면 여기에 표시됩니다.</p>
-        </div>
+    <div class="section">
+        <h2>📋 전체 시간표</h2>
+        <p style="color:#64748b;">assets/master/ 에 전체 시간표 이미지를 넣으면 여기에 표시됩니다.</p>
+    </div>
 """
-    
-    html += f"""
-        <div class="section">
-            <h2>👩‍🏫 교사 시간표 ({len(teachers)}명)</h2>
-"""
-    if teachers:
-        html += '<div class="grid">'
-        for t in teachers:
-            html += f"""
-                <div class="card">
-                    <div class="card-header">{t['name']}</div>
-                    <a href="{t['html']}"><img src="{t['image']}" loading="lazy"></a>
-                </div>
-"""
-        html += '</div>'
-    else:
-        html += '<p style="color:#64748b;">assets/teachers/ 폴더에 이미지를 넣으면 여기에 표시됩니다.</p>'
-    html += '</div>'
-    
-    html += f"""
-        <div class="section">
-            <h2>🏫 학년별 시간표 ({len(classes)}개)</h2>
-"""
-    if classes:
-        html += '<div class="grid">'
-        for c in classes:
-            html += f"""
-                <div class="card">
-                    <div class="card-header">{c['name']}</div>
-                    <a href="{c['html']}"><img src="{c['image']}" loading="lazy"></a>
-                </div>
-"""
-        html += '</div>'
-    else:
-        html += '<p style="color:#64748b;">assets/classes/ 폴더에 이미지를 넣으면 여기에 표시됩니다.</p>'
-    html += '</div></div></body></html>'
-    
-    with open(BASE / "index.html", "w", encoding="utf-8") as f:
-        f.write(html)
 
-def generate_teacher_pages(teachers):
+    html += f"""
+    <div class="section">
+        <h2>👩‍🏫 교사 시간표 ({len(teachers)}명)</h2>
+        <div class="grid">
+"""
     for t in teachers:
-        html = f"""<!DOCTYPE html>
-<html lang="ko">
-<head><meta charset="UTF-8"><title>{t['name']} 선생님</title><link rel="stylesheet" href="../css/style.css"></head>
-<body>
-<div class="container">
-    <a href="../index.html">← 메인</a>
-    <h1>{t['name']} 선생님</h1>
-    <img src="../{t['image']}" style="max-width:100%; border-radius:12px;">
-    <div style="margin-top:20px;">
-        <a href="../{t['image']}" download>다운로드</a>
-        <button onclick="window.print()">인쇄</button>
+        html += f"""
+            <div class="card">
+                <div class="card-header">{t['name']}</div>
+                <a href="{t['html']}"><img src="{t['image']}" loading="lazy"></a>
+            </div>
+"""
+    html += """
+        </div>
+    </div>
+"""
+
+    html += f"""
+    <div class="section">
+        <h2>🏫 학년별 시간표 ({len(classes)}개)</h2>
+        <div class="grid">
+"""
+    for c in classes:
+        html += f"""
+            <div class="card">
+                <div class="card-header">{c['name']}</div>
+                <a href="{c['html']}"><img src="{c['image']}" loading="lazy"></a>
+            </div>
+"""
+    html += """
+        </div>
     </div>
 </div>
 </body>
-</html>"""
-        with open(TEACHERS_HTML / f"{t['id']}.html", "w", encoding="utf-8") as f:
-            f.write(html)
+</html>
+"""
 
-def generate_class_pages(classes):
+    with open(BASE / "index.html", "w", encoding="utf-8") as f:
+        f.write(html)
+
+    for t in teachers:
+        page = f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>{t['name']}</title><link rel="stylesheet" href="../css/style.css"></head>
+<body><div class="container">
+<a href="../index.html">← 메인</a>
+<h1>{t['name']} 선생님</h1>
+<img src="../{t['image']}" style="max-width:100%; border-radius:12px;">
+<div style="margin-top:20px;">
+<a href="../{t['image']}" download>다운로드</a>
+<button onclick="window.print()">인쇄</button>
+</div>
+</div></body></html>"""
+        with open(TEACHERS_HTML / f"{t['id']}.html", "w", encoding="utf-8") as f:
+            f.write(page)
+
     for c in classes:
-        html = f"""<!DOCTYPE html>
-<html lang="ko">
-<head><meta charset="UTF-8"><title>{c['name']}</title><link rel="stylesheet" href="../css/style.css"></head>
-<body>
-<div class="container">
-        <a href="../index.html">← 메인</a>
-        <h1>{c['name']}</h1>
-        <img src="../{c['image']}" style="max-width:100%; border-radius:12px;">
-        <div style="margin-top:20px;">
-            <a href="../{c['image']}" download>다운로드</a>
-            <button onclick="window.print()">인쇄</button>
-        </div>
-    </div>
-</body>
-</html>"""
+        page = f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>{c['name']}</title><link rel="stylesheet" href="../css/style.css"></head>
+<body><div class="container">
+<a href="../index.html">← 메인</a>
+<h1>{c['name']}</h1>
+<img src="../{c['image']}" style="max-width:100%; border-radius:12px;">
+<div style="margin-top:20px;">
+<a href="../{c['image']}" download>다운로드</a>
+<button onclick="window.print()">인쇄</button>
+</div>
+</div></body></html>"""
         with open(CLASSES_HTML / f"{c['id']}.html", "w", encoding="utf-8") as f:
-            f.write(html)
+            f.write(page)
+
+    print(f"✅ 완료: 교사 {len(teachers)}개, 학년별 {len(classes)}개 생성")
 
 if __name__ == "__main__":
-    generate_all()
+    generate()
