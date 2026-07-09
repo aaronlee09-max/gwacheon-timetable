@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과천중앙고등학교 시간표</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏫 과천중앙고등학교</h1>
+            <p>시간표 조회 시스템 • 2026학년도</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="search-section">
+            <h2 style="margin-bottom:15px; color:#1e3a8a;">🔍 빠른 검색</h2>
+            <div class="search-box">
+                <input type="text" id="teacher-search" placeholder="교사 이름으로 검색 (예: 송근화, 김성)">
+                <input type="text" id="class-search" placeholder="학년/요일 검색 (예: 1학년, 월)">
+            </div>
+        </div>
+
+        <div class="search-section">
+            <h2 style="margin-bottom:15px; color:#1e3a8a;">🕒 최근 조회</h2>
+            <div id="recent-list"></div>
+        </div>
+
+        <h2 class="section-title">👩‍🏫 교사 시간표</h2>
+        <div class="grid" id="teachers-grid">
+            <p style="grid-column: 1 / -1; text-align: center; color: #64748b;">교사 시간표 이미지가 assets/teachers/에 있습니다. 개별 페이지는 teachers/ 폴더에 있습니다.</p>
+        </div>
+
+        <h2 class="section-title">🏫 학년별 시간표</h2>
+        <div class="grid" id="classes-grid">
+            <p style="grid-column: 1 / -1; text-align: center; color: #64748b;">학년별 시간표 이미지가 assets/classes/에 있습니다. 개별 페이지는 classes/ 폴더에 있습니다.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>과천중앙고등학교 시간표 시스템 • GitHub Pages 자동 배포</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
