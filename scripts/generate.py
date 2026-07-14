@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-과천중앙고등학교 시간표 - B 방향 적용 버전
-- 교사 데이터에 subject 추가
-- 메인 카드: 이름 + 과목 표시
-- 개별 페이지 제목 개선
-- 검색: 이름 + 약칭 + 과목 지원
+과천중앙고등학교 시간표 - GitHub Actions 호환 버전
 """
 
 import json
 from pathlib import Path
 
-BASE = Path("/home/workdir")
+# GitHub Actions와 로컬 모두 호환되도록 현재 디렉토리 기준으로 설정
+BASE = Path.cwd()
+
 ASSETS = BASE / "assets"
 TEACHERS_DIR = ASSETS / "teachers"
 CLASSES_DIR = ASSETS / "classes"
@@ -21,7 +19,7 @@ DATA_DIR = BASE / "data"
 TEACHERS_HTML = BASE / "teachers"
 CLASSES_HTML = BASE / "classes"
 
-# === 교사 매핑 (B 방향) ===
+# === 교사 매핑 ===
 TEACHER_MAPPING = {
     "김서_": {"full_name": "김서_", "subject": "국어A"},
     "명지_": {"full_name": "명지_", "subject": "국어B"},
@@ -81,8 +79,8 @@ def ensure_folders():
 def get_teachers():
     teachers = []
     for img in sorted(TEACHERS_DIR.glob("*.png")) + sorted(TEACHERS_DIR.glob("*.jpg")):
-        short = img.stem.replace("과천중앙고등학교_", "")
-        mapping = TEACHER_MAPPING.get(short, {"full_name": short, "subject": "미정"})
+        short = img.stem.replace("\uacfc\ucc9c\uc911\uc559\uace0\ub4f1\ud559\uad50_", "")
+        mapping = TEACHER_MAPPING.get(short, {"full_name": short, "subject": "\ubbf8\uc815"})
         
         teachers.append({
             "id": short,
@@ -100,7 +98,7 @@ def get_grades():
     for grade_folder in ["1학년", "2학년", "3학년"]:
         grade_dir = GRADES_DIR / grade_folder
         for img in sorted(grade_dir.glob("*.png")) + sorted(grade_dir.glob("*.jpg")):
-            name = img.stem.replace("과천중앙고등학교_", "")
+            name = img.stem.replace("\uacfc\ucc9c\uc911\uc559\uace0\ub4f1\ud559\uad50_", "")
             grades.append({
                 "id": f"{grade_folder}_{name}",
                 "name": f"{grade_folder} {name}",
@@ -109,25 +107,6 @@ def get_grades():
                 "category": "grade"
             })
     return grades
-
-def get_classes():
-    classes = []
-    for img in sorted(CLASSES_DIR.glob("*.png")) + sorted(CLASSES_DIR.glob("*.jpg")):
-        name = img.stem.replace("과천중앙고등학교_", "")
-        classes.append({
-            "id": name,
-            "name": name,
-            "image": f"assets/classes/{img.name}",
-            "html": f"classes/{name}.html",
-            "category": "class"
-        })
-    return classes
-
-def get_master():
-    imgs = sorted(MASTER_DIR.glob("*.png")) + sorted(MASTER_DIR.glob("*.jpg"))
-    if imgs:
-        return {"image": f"assets/master/{imgs[0].name}"}
-    return None
 
 def generate():
     ensure_folders()
