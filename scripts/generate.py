@@ -6,7 +6,6 @@
 import json
 from pathlib import Path
 
-# GitHub Actions와 로컬 모두 호환되도록 현재 디렉토리 기준으로 설정
 BASE = Path.cwd()
 
 ASSETS = BASE / "assets"
@@ -112,27 +111,23 @@ def generate():
     ensure_folders()
     teachers = get_teachers()
     grades = get_grades()
-    classes = get_classes()
-    master = get_master()
 
-    all_items = teachers + grades + classes
+    all_items = teachers + grades
 
     with open(DATA_DIR / "teachers.json", "w", encoding="utf-8") as f:
         json.dump(teachers, f, ensure_ascii=False, indent=2)
     with open(DATA_DIR / "grades.json", "w", encoding="utf-8") as f:
         json.dump(grades, f, ensure_ascii=False, indent=2)
-    with open(DATA_DIR / "classes.json", "w", encoding="utf-8") as f:
-        json.dump(classes, f, ensure_ascii=False, indent=2)
     with open(DATA_DIR / "search.json", "w", encoding="utf-8") as f:
         json.dump(all_items, f, ensure_ascii=False, indent=2)
 
-    generate_index(teachers, grades, classes, master)
+    generate_index(teachers, grades)
     generate_teacher_pages(teachers)
-    generate_class_pages(classes)
+    generate_class_pages(grades)
 
     print(f"✅ 생성 완료: 교사 {len(teachers)}명, 학년별 {len(grades)}개")
 
-def generate_index(teachers, grades, classes, master):
+def generate_index(teachers, grades):
     html = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -146,14 +141,6 @@ def generate_index(teachers, grades, classes, master):
     <h1>🏫 과천중앙고등학교 시간표</h1>
 </header>
 <div class="container">
-"""
-
-    if master:
-        html += f"""
-    <div class="section">
-        <h2>📋 전체 시간표</h2>
-        <img src="{master['image']}" style="max-width:100%; border-radius:12px;">
-    </div>
 """
 
     html += f"""
@@ -226,24 +213,24 @@ def generate_teacher_pages(teachers):
         with open(TEACHERS_HTML / f"{t['id']}.html", "w", encoding="utf-8") as f:
             f.write(html)
 
-def generate_class_pages(classes):
-    for c in classes:
+def generate_class_pages(grades):
+    for g in grades:
         html = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>{c['name']} 시간표</title>
+    <title>{g['name']} 시간표</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 <div class="container">
     <a href="../index.html">← 메인으로</a>
-    <h1>{c['name']}</h1>
-    <img src="../{c['image']}" style="max-width:100%; border-radius:12px;">
+    <h1>{g['name']}</h1>
+    <img src="../{g['image']}" style="max-width:100%; border-radius:12px;">
 </div>
 </body>
 </html>"""
-        with open(CLASSES_HTML / f"{c['id']}.html", "w", encoding="utf-8") as f:
+        with open(CLASSES_HTML / f"{g['id']}.html", "w", encoding="utf-8") as f:
             f.write(html)
 
 if __name__ == "__main__":
