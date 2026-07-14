@@ -145,7 +145,7 @@ def generate_index(teachers, grades):
 
     html += f"""
     <div class="section">
-        <h2>👨‍🏫 교사 시간표 ({len(teachers)}명)</h2>
+        <h2>👨‍🏫 교사 시간표 ({len(teachers)})명)</h2>
         <div class="grid">
 """
     for t in teachers:
@@ -165,7 +165,7 @@ def generate_index(teachers, grades):
 
     html += f"""
     <div class="section">
-        <h2>🏫 학년별 시간표 ({len(grades)}개)</h2>
+        <h2>🏫 학년별 시간표 ({len(grades)})개)</h2>
         <div class="grid">
 """
     for g in grades:
@@ -195,18 +195,48 @@ def generate_teacher_pages(teachers):
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{t['name']} 선생님 ({t['subject']}) 시간표</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .timetable-wrapper {{
+            max-width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+        }}
+        .timetable-img {{
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }}
+        .download-btn {{
+            display: inline-block;
+            margin-top: 12px;
+            padding: 12px 24px;
+            background-color: #1565C0;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }}
+        .download-btn:hover {{
+            background-color: #0d47a1;
+        }}
+    </style>
 </head>
 <body>
 <div class="container">
     <a href="../index.html">← 메인으로</a>
     <h1>👨‍🏫 {t['name']} 선생님 ({t['subject']})</h1>
-    <img src="../{t['image']}" style="max-width:100%; border-radius:12px; margin:20px 0;">
-    <div>
-        <a href="../{t['image']}" download>📥 다운로드</a>
-        <button onclick="window.print()">🕹️ 인쇄</button>
+    
+    <div class="timetable-wrapper">
+        <img src="../{t['image']}" class="timetable-img" alt="{t['name']} 시간표">
     </div>
+    
+    <a href="../{t['image']}" download class="download-btn">📥 이미지 다운로드</a>
 </div>
 </body>
 </html>"""
@@ -219,14 +249,48 @@ def generate_class_pages(grades):
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{g['name']} 시간표</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .timetable-wrapper {{
+            max-width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+        }}
+        .timetable-img {{
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }}
+        .download-btn {{
+            display: inline-block;
+            margin-top: 12px;
+            padding: 12px 24px;
+            background-color: #1565C0;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }}
+        .download-btn:hover {{
+            background-color: #0d47a1;
+        }}
+    </style>
 </head>
 <body>
 <div class="container">
     <a href="../index.html">← 메인으로</a>
     <h1>{g['name']}</h1>
-    <img src="../{g['image']}" style="max-width:100%; border-radius:12px;">
+    
+    <div class="timetable-wrapper">
+        <img src="../{g['image']}" class="timetable-img" alt="{g['name']} 시간표">
+    </div>
+    
+    <a href="../{g['image']}" download class="download-btn">📥 이미지 다운로드</a>
 </div>
 </body>
 </html>"""
