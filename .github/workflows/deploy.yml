@@ -15,16 +15,20 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'   # 3.11 → 3.12로 업데이트 (권장)
+          python-version: '3.12'
 
-      - name: Generate files
+      - name: Run Comcigan Parser
+        run: python scripts/comcigan_parser.py
+        continue-on-error: true   # 파서가 실패해도 계속 진행
+
+      - name: Generate HTML files
         run: python scripts/generate.py
 
       - name: Configure Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4   # v3 → v4로 업데이트
+        uses: actions/upload-pages-artifact@v4
         with:
           path: '.'
 
